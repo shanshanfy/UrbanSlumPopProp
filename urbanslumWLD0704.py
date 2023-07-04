@@ -173,17 +173,18 @@ df_normalized = scaler.fit_transform(df.drop('urbanslum', axis=1))
 pca = PCA()  
 df_pca = pca.fit_transform(df_normalized)  
 
-n_pcs = pca.components_.shape[0]
+n_pcs = 10 
 most_important = [np.abs(pca.components_[i]).argmax() for i in range(n_pcs)]
 initial_feature_names = df.drop('urbanslum', axis=1).columns
-most_important_names = [initial_feature_names[most_important[i]] for i in range(n_pcs)]
+most_important_names = [initial_feature_names[most_important[i]] for i in range(n_pcs)]  
 most_important_names_set = set(most_important_names)
 
-df_pca_results = pd.DataFrame({'PC':range(1, len(most_important_names)+1),
-                               'Explained Variance Ratio': pca.explained_variance_ratio_,
+df_pca_results = pd.DataFrame({'PC':range(1, n_pcs+1),  # Adjusted to reflect top 10
+                               'Explained Variance Ratio': pca.explained_variance_ratio_[:n_pcs],  # Adjusted to get only top 10
                                'Most Important Feature': most_important_names})
 
-df_pca_results.to_csv('Table 4. the top 15 pca_results.csv', index=False)
+
+df_pca_results.to_csv('Table 4. PCA and explained variance ratio.csv', index=False)
 
 df_pca_results = pd.DataFrame({'PC': range(1, len(most_important_names) + 1),
                                'Explained Variance Ratio': pca.explained_variance_ratio_,
