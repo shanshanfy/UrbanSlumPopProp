@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import warnings
 warnings.filterwarnings('ignore')
-get_ipython().run_line_magic('matplotlib', 'inline')
+# get_ipython().run_line_magic('matplotlib', 'inline')
 from sklearn.model_selection import train_test_split
 from pandas import ExcelWriter, ExcelFile
 from sklearn.datasets import load_iris
@@ -34,12 +34,10 @@ from sklearn.ensemble import RandomForestRegressor, GradientBoostingRegressor
 from sklearn.svm import SVR
 from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 from scipy import stats
-
 from tabulate import tabulate
 from fpdf import FPDF
 
 df = pd.read_csv('urbanslumWLD1.csv')
-
 years = np.arange(2000, 2021)
 proportions = np.array([31.2, np.nan, 30.9, np.nan, 30.1, np.nan, 29.2, np.nan, 28.2, np.nan, 27.3, np.nan, 26.3, np.nan, 25.4, np.nan, 24.6, np.nan, 24.4, np.nan, 24.2])
 
@@ -72,58 +70,39 @@ plt.rcParams['font.family'] = ['Arial Unicode MS']
 
 X = df.drop("urbanslum", axis=1)
 y = df['urbanslum']
-
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
-
-
 train_cols = 14
 train_rows = len(X_train.columns) 
 plt.figure(figsize=(4*train_cols, 4*train_rows))
-
 i = 0
 failed_tests = []  
-
 for col in X_train.columns:
     i += 1
     ax = plt.subplot(train_rows, train_cols, i)
     sns.distplot(X_train[col], fit=stats.norm)
     sns.distplot(X_test[col], fit=stats.norm)
     plt.legend(['Train', 'Test'])
-    
-    ks_statistic, p_value = stats.ks_2samp(X_train[col].dropna(), X_test[col].dropna())
-    
+    ks_statistic, p_value = stats.ks_2samp(X_train[col].dropna(), X_test[col].dropna())    
     if p_value < 0.05:
         failed_tests.append(col)
     i += 1
     ax = plt.subplot(train_rows, train_cols, i)
     res = stats.probplot(X_train[col].dropna(), plot=plt)
-    stats.probplot(X_test[col].dropna(), plot=plt)
-    
+    stats.probplot(X_test[col].dropna(), plot=plt)   
 
-    ax.set_title(f'KS statistic: {ks_statistic:.2f}, p-value: {p_value:.2f}')
-    
+    ax.set_title(f'KS statistic: {ks_statistic:.2f}, p-value: {p_value:.2f}')    
 # plt.tight_layout()
 plt.savefig('Fig4 KS test.pdf', format='pdf', bbox_inches='tight')
 
-
 if 'year' in df.columns:
     df = df.drop(columns='year')
-
-
 corr = df.corr()
-
-
 cmap = sns.diverging_palette(230, 20, as_cmap=True)
-
-
 sns.clustermap(corr, cmap=cmap, center=0,
                square=True, linewidths=.5, cbar_kws={"shrink": .5, 'label': 'Correlation coefficient'})
-
-
 plt.savefig('Fig.1 Clustered heatmap of the overall interrelationships among the variables.pdf', format='pdf', bbox_inches='tight') 
 
 import pandas as pd
-
 feature_names = ["urbanslum",
     "NV.IND.MANF.ZS",
     "SP.POP.GROW",
@@ -161,28 +140,17 @@ feature_names = ["urbanslum",
     "NY.GDP.MINR.RT.ZS"
 ]
 
-
 file_path = "urbanslumWLD1.csv"  
 
-try:
-    
+try:   
     df = pd.read_csv(file_path)
-
-
-    df_selected_features = df[feature_names]
-
-   
+    df_selected_features = df[feature_names] 
     df_selected_features.to_csv("selected_features1.csv", index=False)
-
     print("New CSV file 'selected_features1.csv' created successfully.")
-
 except FileNotFoundError:
     print("Error: File 'urbanslumWLD1.csv' not found. Please provide the correct file path.")
 
-
 df = df.apply(pd.to_numeric, errors='coerce')
-
-
 scaler = StandardScaler()
 df_normalized = scaler.fit_transform(df)
 
@@ -198,18 +166,12 @@ plt.savefig('Fig5 PCA explained ratio.pdf', format='pdf', bbox_inches='tight')
 
 n_pcs = pca.components_.shape[0]
 most_important = [np.abs(pca.components_[i]).argmax() for i in range(n_pcs)]
-
 initial_feature_names = df.columns
-
 most_important_names = [initial_feature_names[most_important[i]] for i in range(n_pcs)]
-
 scaler = StandardScaler()
 df_normalized = scaler.fit_transform(df.drop('urbanslum', axis=1))
-
 pca = PCA()  
 df_pca = pca.fit_transform(df_normalized)  
-
-
 
 n_pcs = pca.components_.shape[0]
 most_important = [np.abs(pca.components_[i]).argmax() for i in range(n_pcs)]
@@ -221,18 +183,13 @@ df_pca_results = pd.DataFrame({'PC':range(1, len(most_important_names)+1),
                                'Explained Variance Ratio': pca.explained_variance_ratio_,
                                'Most Important Feature': most_important_names})
 
-
 df_pca_results.to_csv('Table 4. the top 15 pca_results.csv', index=False)
-
 
 df_pca_results = pd.DataFrame({'PC': range(1, len(most_important_names) + 1),
                                'Explained Variance Ratio': pca.explained_variance_ratio_,
                                'Most Important Feature': most_important_names})
 
-
 table = tabulate(df_pca_results, headers='keys', tablefmt='pipe')
-
-
 class PDF(FPDF):
     def header(self):
         self.set_font('Arial', 'B', 12)
@@ -252,7 +209,6 @@ class PDF(FPDF):
         self.set_font('Arial', '', 12)
         self.multi_cell(0, 10, text)
         self.ln()
-
 
 pdf = PDF()
 pdf.add_page()
@@ -284,10 +240,7 @@ for name, model in models:
     r2 = r2_score(y, y_pred)
     if r2 < 0:
         r2 = 0.0
-
     results.loc[len(results)] = [name, mae, mse, r2]
-
-
 df = pd.read_csv('selected_features1.csv')
 y = df['urbanslum']
 X = df.drop('urbanslum', axis=1)
