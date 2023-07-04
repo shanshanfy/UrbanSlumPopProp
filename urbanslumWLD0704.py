@@ -102,9 +102,9 @@ for col in X_train.columns:
 
     ax.set_title(f'KS statistic: {ks_statistic:.2f}, p-value: {p_value:.2f}')
     
-plt.tight_layout()
+# plt.tight_layout()
 plt.savefig('Fig4 KS test.pdf', format='pdf', bbox_inches='tight')
-plt.show()
+
 
 if 'year' in df.columns:
     df = df.drop(columns='year')
